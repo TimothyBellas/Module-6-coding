@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Five interactive flashcards for reviewing web development concepts.">
+  <title>Course Flashcards</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      align-items: center;
+      background: linear-gradient(145deg, #0f172a, #111827 55%, #172554);
+      color: #172033;
+      display: flex;
+      font-family: Arial, Helvetica, sans-serif;
+      justify-content: center;
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .flashcard-app {
+      max-width: 42rem;
+      width: 100%;
+    }
+
+    .app-header {
+      color: #f8fafc;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .eyebrow {
+      color: #93c5fd;
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 7vw, 3rem);
+      line-height: 1.1;
+      margin-bottom: 0.75rem;
+    }
+
+    #progress {
+      color: #cbd5e1;
+      font-size: 1rem;
+    }
+
+    .flashcard {
+      background-color: #ffffff;
+      border-top: 0.4rem solid #3b82f6;
+      border-radius: 1rem;
+      box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.3);
+      min-height: 20rem;
+      padding: clamp(1.5rem, 5vw, 2.5rem);
+    }
+
+    .label {
+      color: #2563eb;
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.65rem;
+      text-transform: uppercase;
+    }
+
+    #question {
+      color: #0f172a;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      line-height: 1.3;
+    }
+
+    #answer-panel {
+      background-color: #eff6ff;
+      border-left: 0.3rem solid #3b82f6;
+      border-radius: 0.5rem;
+      display: none;
+      margin-top: 2rem;
+      padding: 1.25rem;
+    }
+
+    #answer-panel .label {
+      margin-bottom: 0.35rem;
+    }
+
+    #answer {
+      color: #1e3a8a;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    button {
+      border: 2px solid transparent;
+      border-radius: 0.65rem;
+      cursor: pointer;
+      flex: 1;
+      font: inherit;
+      font-weight: 700;
+      min-height: 3.25rem;
+      padding: 0.75rem 1rem;
+      transition: background-color 0.2s ease, border-color 0.2s ease,
+        color 0.2s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-0.15rem);
+    }
+
+    button:focus-visible {
+      outline: 3px solid #facc15;
+      outline-offset: 3px;
+    }
+
+    #show-answer {
+      background-color: #ffffff;
+      border-color: #93c5fd;
+      color: #1d4ed8;
+    }
+
+    #show-answer:hover {
+      background-color: #dbeafe;
+      border-color: #60a5fa;
+    }
+
+    #next-card {
+      background-color: #2563eb;
+      color: #ffffff;
+    }
+
+    #next-card:hover {
+      background-color: #1d4ed8;
+    }
+
+    @media (max-width: 32rem) {
+      .flashcard {
+        min-height: 18rem;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      button {
+        transition: none;
+      }
+
+      button:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="flashcard-app">
+    <header class="app-header">
+      <p class="eyebrow">Web Development Review</p>
+      <h1>Course Flashcards</h1>
+      <p id="progress" aria-live="polite">Card 1 of 5</p>
+    </header>
+
+    <section class="flashcard" aria-labelledby="question">
+      <p class="label">Question</p>
+      <h2 id="question"></h2>
+
+      <div id="answer-panel" aria-live="polite">
+        <p class="label">Answer</p>
+        <p id="answer"></p>
+      </div>
+    </section>
+
+    <div class="controls">
+      <button id="show-answer" type="button">Show Answer</button>
+      <button id="next-card" type="button">Next</button>
+    </div>
+  </main>
+
+  <script>
+    const cards = [
+      {
+        question: "What does HTTP stand for?",
+        answer: "HyperText Transfer Protocol"
+      },
+      {
+        question: "What status code means ‘Not Found’?",
+        answer: "404"
+      },
+      {
+        question: "What does CSS stand for?",
+        answer: "Cascading Style Sheets"
+      },
+      {
+        question: "What does DOM stand for?",
+        answer: "Document Object Model"
+      },
+      {
+        question: "What Python library do we use for HTTP requests?",
+        answer: "requests"
+      }
+    ];
+
+    let currentIndex = 0;
+
+    const questionElement = document.getElementById("question");
+    const answerElement = document.getElementById("answer");
+    const answerPanel = document.getElementById("answer-panel");
+    const progressElement = document.getElementById("progress");
+    const showAnswerButton = document.getElementById("show-answer");
+    const nextCardButton = document.getElementById("next-card");
+
+    function displayCard() {
+      const currentCard = cards[currentIndex];
+
+      questionElement.textContent = currentCard.question;
+      answerElement.textContent = currentCard.answer;
+      progressElement.textContent = `Card ${currentIndex + 1} of ${cards.length}`;
+      answerPanel.style.display = "none";
+    }
+
+    showAnswerButton.addEventListener("click", function () {
+      answerPanel.style.display = "block";
+    });
+
+    nextCardButton.addEventListener("click", function () {
+      currentIndex = (currentIndex + 1) % cards.length;
+      displayCard();
+    });
+
+    displayCard();
+  </script>
+</body>
+</html>
