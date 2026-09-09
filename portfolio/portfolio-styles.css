@@ -1,0 +1,155 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+header,
+footer {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+header {
+  padding: 2.5rem 1rem 2rem;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 3rem;
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+}
+
+header > p {
+  color: #cbd5e1;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  list-style: none;
+}
+
+nav a {
+  border-bottom: 2px solid transparent;
+  color: #f9fafb;
+  padding-bottom: 0.25rem;
+  text-decoration: none;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+nav a:hover,
+nav a:focus-visible {
+  border-bottom-color: #60a5fa;
+  color: #93c5fd;
+}
+
+main {
+  margin: 0 auto;
+  max-width: 900px;
+  padding: 3rem 1.25rem;
+}
+
+section {
+  margin-bottom: 3rem;
+}
+
+section:last-child {
+  margin-bottom: 0;
+}
+
+section h2 {
+  border-bottom: 3px solid #2563eb;
+  color: #111827;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.4rem;
+}
+
+.project-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.project-grid article {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+  flex: 1 1 250px;
+  padding: 1.5rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.project-grid article:hover {
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
+  transform: translateY(-0.25rem);
+}
+
+.project-grid h3 {
+  color: #1d4ed8;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+#skills ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  list-style: none;
+}
+
+#skills li {
+  background-color: #dbeafe;
+  border-radius: 999px;
+  color: #1e3a8a;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+}
+
+footer {
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+footer address {
+  font-style: normal;
+  margin-bottom: 0.5rem;
+}
+
+footer a {
+  color: #93c5fd;
+  transition: color 0.2s ease;
+}
+
+footer a:hover,
+footer a:focus-visible {
+  color: #ffffff;
+}
+
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 2.5rem;
+  }
+
+  main {
+    padding-block: 2rem;
+  }
+
+  section h2 {
+    font-size: 1.75rem;
+  }
+}
