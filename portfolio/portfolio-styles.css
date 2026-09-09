@@ -1,9 +1,11 @@
+/* Reset browser defaults and include padding and borders in element widths. */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* Set the page's base colors, typeface, and readable line spacing. */
 body {
   background-color: #f3f4f6;
   color: #1f2937;
@@ -12,17 +14,20 @@ body {
   line-height: 1.6;
 }
 
+/* Give the header and footer the same dark visual theme. */
 header,
 footer {
   background-color: #111827;
   color: #f9fafb;
 }
 
+/* Add space around the introductory content and center its text. */
 header {
   padding: 2.5rem 1rem 2rem;
   text-align: center;
 }
 
+/* Make the portfolio owner's name larger than the browser's default h1. */
 header h1 {
   font-size: 3rem;
   line-height: 1.1;
@@ -35,6 +40,7 @@ header > p {
   margin-bottom: 1.5rem;
 }
 
+/* Flexbox places the navigation links in a centered, wrapping row. */
 nav ul {
   display: flex;
   flex-wrap: wrap;
@@ -43,6 +49,7 @@ nav ul {
   list-style: none;
 }
 
+/* Remove default link underlines and animate interaction feedback. */
 nav a {
   border-bottom: 2px solid transparent;
   color: #f9fafb;
@@ -51,18 +58,21 @@ nav a {
   transition: border-color 0.2s ease, color 0.2s ease;
 }
 
+/* Apply the same highlight for mouse hover and keyboard focus. */
 nav a:hover,
 nav a:focus-visible {
   border-bottom-color: #60a5fa;
   color: #93c5fd;
 }
 
+/* Limit the content width and center the main area on the page. */
 main {
   margin: 0 auto;
   max-width: 900px;
   padding: 3rem 1.25rem;
 }
 
+/* Use bottom margin to create space between the main content sections. */
 section {
   margin-bottom: 3rem;
 }
@@ -71,6 +81,7 @@ section:last-child {
   margin-bottom: 0;
 }
 
+/* Add a blue border accent beneath every section heading. */
 section h2 {
   border-bottom: 3px solid #2563eb;
   color: #111827;
@@ -79,21 +90,25 @@ section h2 {
   padding-bottom: 0.4rem;
 }
 
+/* Flexbox arranges cards in a row and wraps them when space runs out. */
 .project-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
 }
 
+/* Create each project card using the box model, rounded corners, and shadow. */
 .project-grid article {
   background-color: #ffffff;
   border-radius: 0.75rem;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+  /* Grow and shrink as needed, using 250px as the preferred card width. */
   flex: 1 1 250px;
   padding: 1.5rem;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+/* Lift cards slightly when the pointer moves over them. */
 .project-grid article:hover {
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
   transform: translateY(-0.25rem);
@@ -105,6 +120,7 @@ section h2 {
   margin-bottom: 0.75rem;
 }
 
+/* Display the skills as flexible tags instead of a traditional list. */
 #skills ul {
   display: flex;
   flex-wrap: wrap;
@@ -120,6 +136,7 @@ section h2 {
   padding: 0.5rem 1rem;
 }
 
+/* Match the footer to the header and keep its content centered. */
 footer {
   padding: 2rem 1rem;
   text-align: center;
@@ -130,6 +147,7 @@ footer address {
   margin-bottom: 0.5rem;
 }
 
+/* Use a contrasting link color against the footer's dark background. */
 footer a {
   color: #93c5fd;
   transition: color 0.2s ease;
@@ -140,6 +158,7 @@ footer a:focus-visible {
   color: #ffffff;
 }
 
+/* Reduce selected spacing and type sizes on narrow screens. */
 @media (max-width: 600px) {
   header h1 {
     font-size: 2.5rem;

@@ -7,12 +7,14 @@
   <title>Course Flashcards</title>
 
   <style>
+    /* Reset default spacing and make element sizing easier to control. */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+    /* Center the app on a full-height background. */
     body {
       align-items: center;
       background: linear-gradient(145deg, #0f172a, #111827 55%, #172554);
@@ -30,6 +32,7 @@
       width: 100%;
     }
 
+    /* Style the title and progress information above the card. */
     .app-header {
       color: #f8fafc;
       margin-bottom: 1.25rem;
@@ -56,6 +59,7 @@
       font-size: 1rem;
     }
 
+    /* Create the main white flashcard surface. */
     .flashcard {
       background-color: #ffffff;
       border-top: 0.4rem solid #3b82f6;
@@ -80,6 +84,7 @@
       line-height: 1.3;
     }
 
+    /* JavaScript changes this panel to display: block when requested. */
     #answer-panel {
       background-color: #eff6ff;
       border-left: 0.3rem solid #3b82f6;
@@ -105,6 +110,7 @@
       margin-top: 1.25rem;
     }
 
+    /* Place both controls side by side on wider screens. */
     button {
       border: 2px solid transparent;
       border-radius: 0.65rem;
@@ -147,6 +153,7 @@
       background-color: #1d4ed8;
     }
 
+    /* Stack the buttons when the screen is narrow. */
     @media (max-width: 32rem) {
       .flashcard {
         min-height: 18rem;
@@ -157,6 +164,7 @@
       }
     }
 
+    /* Respect the user's reduced-motion accessibility preference. */
     @media (prefers-reduced-motion: reduce) {
       button {
         transition: none;
@@ -171,12 +179,14 @@
 
 <body>
   <main class="flashcard-app">
+    <!-- App title and progress indicator -->
     <header class="app-header">
       <p class="eyebrow">Web Development Review</p>
       <h1>Course Flashcards</h1>
       <p id="progress" aria-live="polite">Card 1 of 5</p>
     </header>
 
+    <!-- JavaScript inserts the current question and answer here. -->
     <section class="flashcard" aria-labelledby="question">
       <p class="label">Question</p>
       <h2 id="question"></h2>
@@ -187,6 +197,7 @@
       </div>
     </section>
 
+    <!-- Buttons provide the two interactions required by the app. -->
     <div class="controls">
       <button id="show-answer" type="button">Show Answer</button>
       <button id="next-card" type="button">Next</button>
@@ -194,6 +205,7 @@
   </main>
 
   <script>
+    // Store the course questions and answers as objects inside an array.
     const cards = [
       {
         question: "What does HTTP stand for?",
@@ -217,8 +229,10 @@
       }
     ];
 
+    // Track which card is currently displayed. Array indexes begin at 0.
     let currentIndex = 0;
 
+    // Select the HTML elements that JavaScript needs to read or update.
     const questionElement = document.getElementById("question");
     const answerElement = document.getElementById("answer");
     const answerPanel = document.getElementById("answer-panel");
@@ -226,6 +240,7 @@
     const showAnswerButton = document.getElementById("show-answer");
     const nextCardButton = document.getElementById("next-card");
 
+    // Update the page with the current card and hide its answer.
     function displayCard() {
       const currentCard = cards[currentIndex];
 
@@ -235,15 +250,18 @@
       answerPanel.style.display = "none";
     }
 
+    // Reveal the current answer when the user clicks Show Answer.
     showAnswerButton.addEventListener("click", function () {
       answerPanel.style.display = "block";
     });
 
+    // Advance one card. The modulo operator loops back after the last card.
     nextCardButton.addEventListener("click", function () {
       currentIndex = (currentIndex + 1) % cards.length;
       displayCard();
     });
 
+    // Display Card 1 as soon as the page loads.
     displayCard();
   </script>
 </body>
