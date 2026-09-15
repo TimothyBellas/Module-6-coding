@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<!--
+  L6 — Mini Dashboard: HTML Frontend
+  ===================================
+  Requires the FastAPI backend at http://localhost:8000.
+  Start it with: uvicorn mini_api:app --reload --port 8000
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Dashboard</title>
+  <style>
+    /* Apply predictable sizing and remove default browser spacing. */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Center the dashboard on a light page background. */
+    body {
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      color: #172033;
+      background: #eef2f7;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+
+    /* Limit the content width while allowing it to shrink on small screens. */
+    .dashboard {
+      width: min(100%, 680px);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    /* Display the three statistic cards in one equal-width row. */
+    #stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Reuse the same card appearance for the stats and main content panel. */
+    .stat-card,
+    .panel {
+      border: 1px solid #dce3ec;
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 8px 24px rgba(23, 32, 51, 0.07);
+    }
+
+    .stat-card {
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-card span {
+      display: block;
+      margin-top: 0.25rem;
+      color: #315efb;
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    /* The panel contains the form, toolbar, messages, and task list. */
+    .panel {
+      padding: 1.25rem;
+    }
+
+    /* Keep the text box and Add Task button on the same row. */
+    #add-form {
+      display: flex;
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+    }
+
+    /* flex: 1 lets the input use all space left beside the button. */
+    #new-task-input {
+      flex: 1;
+      min-width: 0;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid #bdc8d8;
+      border-radius: 7px;
+      font: inherit;
+    }
+
+    /* Make keyboard focus easy to see for accessibility. */
+    #new-task-input:focus {
+      border-color: #315efb;
+      outline: 3px solid rgba(49, 94, 251, 0.15);
+    }
+
+    button {
+      padding: 0.7rem 1rem;
+      border: none;
+      border-radius: 7px;
+      color: #ffffff;
+      background: #315efb;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Give users visual feedback when they hover over an enabled button. */
+    button:hover {
+      background: #244bd1;
+    }
+
+    /* Disabled buttons prevent duplicate requests while fetch() is running. */
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    /* Place the Refresh button and last-updated time on opposite sides. */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e4e9f0;
+    }
+
+    #refresh-btn {
+      color: #25324a;
+      background: #e6ebf3;
+    }
+
+    #refresh-btn:hover {
+      background: #d6deea;
+    }
+
+    /* Use muted text for secondary status information. */
+    #timestamp,
+    #status {
+      color: #627087;
+      font-size: 0.9rem;
+    }
+
+    #status {
+      padding-top: 1rem;
+    }
+
+    /* Style API or network errors so they stand out from normal status text. */
+    #error-msg {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border: 1px solid #f2b8b5;
+      border-radius: 7px;
+      color: #9d2520;
+      background: #fff1f0;
+    }
+
+    /* Do not show an empty red error box when no error exists. */
+    #error-msg:empty {
+      display: none;
+    }
+
+    /* Remove default bullets because each task has a custom row layout. */
+    #task-list {
+      margin-top: 1rem;
+      list-style: none;
+    }
+
+    /* Put each task title and its action/status on one flexible row. */
+    .task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid #edf0f4;
+    }
+
+    .task-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Allow long task titles to wrap instead of overflowing the panel. */
+    .task-title {
+      overflow-wrap: anywhere;
+    }
+
+    /* Completed tasks are visually crossed out. */
+    .task-title.done {
+      color: #758196;
+      text-decoration: line-through;
+    }
+
+    .done-label {
+      color: #278153;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    /* Use green for the action that marks a pending task complete. */
+    .complete-btn {
+      flex-shrink: 0;
+      padding: 0.5rem 0.75rem;
+      background: #278153;
+    }
+
+    .complete-btn:hover {
+      background: #1f6843;
+    }
+
+    /* Stack controls vertically on phones and narrow browser windows. */
+    @media (max-width: 520px) {
+      #stats {
+        grid-template-columns: 1fr;
+      }
+
+      #add-form,
+      .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="dashboard">
+    <h1>Task Dashboard</h1>
+
+    <!--
+      These spans begin with placeholders. loadStats() replaces them with the
+      live total, done, and pending values returned by GET /stats.
+    -->
+    <section id="stats" aria-label="Task statistics">
+      <p class="stat-card">Total <span id="stat-total">–</span></p>
+      <p class="stat-card">Done <span id="stat-done">–</span></p>
+      <p class="stat-card">Pending <span id="stat-pending">–</span></p>
+    </section>
+
+    <section class="panel">
+      <!--
+        Submitting this form sends the entered title to POST /tasks. The
+        required and maxlength attributes match the backend validation rules.
+      -->
+      <form id="add-form">
+        <input
+          type="text"
+          id="new-task-input"
+          maxlength="200"
+          placeholder="Add a new task…"
+          aria-label="New task title"
+          required
+        />
+        <button type="submit">Add Task</button>
+      </form>
+
+      <!-- The button and page load both call the same refreshAll() function. -->
+      <div class="toolbar">
+        <button type="button" id="refresh-btn">↻ Refresh</button>
+        <p id="timestamp">Last updated: Never</p>
+      </div>
+
+      <!-- aria-live lets screen readers announce loading and error messages. -->
+      <p id="status" aria-live="polite">Loading tasks…</p>
+      <div id="error-msg" role="alert" aria-live="assertive"></div>
+
+      <!-- JavaScript inserts the task <li> elements here. -->
+      <ul id="task-list"></ul>
+    </section>
+  </main>
+
+  <script>
+    // Keep the API's base address in one place so it is easy to change later.
+    const API = "http://localhost:8000";
+
+    // Store references to the HTML elements that JavaScript updates.
+    const taskList = document.querySelector("#task-list");
+    const statusDiv = document.querySelector("#status");
+    const errorMsg = document.querySelector("#error-msg");
+    const timestamp = document.querySelector("#timestamp");
+    const addForm = document.querySelector("#add-form");
+    const newTaskInput = document.querySelector("#new-task-input");
+    const refreshBtn = document.querySelector("#refresh-btn");
+    const addButton = addForm.querySelector("button");
+    const statTotal = document.querySelector("#stat-total");
+    const statDone = document.querySelector("#stat-done");
+    const statPending = document.querySelector("#stat-pending");
+
+    // ── Load tasks ─────────────────────────────────────────────────────
+    // GET /tasks and send the returned JSON array to renderTasks().
+    async function loadTasks() {
+      // await pauses this function until the server sends its response.
+      const response = await fetch(`${API}/tasks`);
+
+      // fetch() does not automatically throw for HTTP errors such as 404/500.
+      if (!response.ok) {
+        throw new Error(`Could not load tasks (HTTP ${response.status}).`);
+      }
+
+      // Convert the JSON response body into a JavaScript array.
+      const tasks = await response.json();
+      renderTasks(tasks);
+    }
+
+    // ── Load statistics ────────────────────────────────────────────────
+    // GET /stats and place each returned count in the stats bar.
+    async function loadStats() {
+      const response = await fetch(`${API}/stats`);
+
+      // Throwing here sends control to refreshAll()'s catch block.
+      if (!response.ok) {
+        throw new Error(`Could not load stats (HTTP ${response.status}).`);
+      }
+
+      const stats = await response.json();
+
+      // textContent safely changes only the visible text of each span.
+      statTotal.textContent = stats.total;
+      statDone.textContent = stats.done;
+      statPending.textContent = stats.pending;
+    }
+
+    // ── Refresh all dashboard data ─────────────────────────────────────
+    // Refresh the task list and stats together on page load and button clicks.
+    async function refreshAll() {
+      // Reset old messages and lock Refresh while requests are in progress.
+      statusDiv.textContent = "Loading tasks…";
+      errorMsg.textContent = "";
+      refreshBtn.disabled = true;
+
+      try {
+        // Promise.all runs both GET requests together and waits for both.
+        await Promise.all([loadTasks(), loadStats()]);
+
+        // Update the time only after the dashboard data loads successfully.
+        statusDiv.textContent = "";
+        timestamp.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+      } catch (error) {
+        // A network failure or unsuccessful HTTP response ends up here.
+        statusDiv.textContent = "";
+        errorMsg.textContent = `${error.message} Is the FastAPI server running on port 8000?`;
+      } finally {
+        // finally always runs, whether the requests succeeded or failed.
+        refreshBtn.disabled = false;
+      }
+    }
+
+    // ── Render task list ───────────────────────────────────────────────
+    // Build one safe list item for each task without inserting raw HTML.
+    function renderTasks(tasks) {
+      // Remove the task elements left from the previous fetch.
+      taskList.replaceChildren();
+
+      // Display a friendly message when the API returns an empty array.
+      if (tasks.length === 0) {
+        const emptyItem = document.createElement("li");
+        emptyItem.className = "task-item";
+        emptyItem.textContent = "No tasks yet. Add your first task above.";
+        taskList.appendChild(emptyItem);
+        return;
+      }
+
+      // Convert every task object into one <li> row.
+      tasks.forEach((task) => {
+        const item = document.createElement("li");
+        item.className = "task-item";
+
+        // Use textContent so a task title is treated as text, not HTML code.
+        const title = document.createElement("span");
+        title.className = task.done ? "task-title done" : "task-title";
+        title.textContent = task.title;
+        item.appendChild(title);
+
+        if (task.done) {
+          // Completed tasks receive a label and a strikethrough title class.
+          const doneLabel = document.createElement("span");
+          doneLabel.className = "done-label";
+          doneLabel.textContent = "Done";
+          item.appendChild(doneLabel);
+        } else {
+          // Pending tasks receive a button connected to their unique task ID.
+          const doneButton = document.createElement("button");
+          doneButton.type = "button";
+          doneButton.className = "complete-btn";
+          doneButton.textContent = "Mark Done";
+          doneButton.addEventListener("click", () => completeTask(task.id, doneButton));
+          item.appendChild(doneButton);
+        }
+
+        // Add the finished row to the visible unordered list.
+        taskList.appendChild(item);
+      });
+    }
+
+    // ── Complete a task ────────────────────────────────────────────────
+    // PATCH the selected task, then reload both the tasks and their counts.
+    async function completeTask(id, button) {
+      // Clear old errors and prevent double-clicking this task's button.
+      errorMsg.textContent = "";
+      button.disabled = true;
+
+      try {
+        const response = await fetch(`${API}/tasks/${id}/complete`, {
+          method: "PATCH",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Could not complete task (HTTP ${response.status}).`);
+        }
+
+        // The server data changed, so request a fresh task list and stats.
+        await refreshAll();
+      } catch (error) {
+        // Keep the row usable if the PATCH request fails.
+        errorMsg.textContent = error.message;
+        button.disabled = false;
+      }
+    }
+
+    // ── Add a task ─────────────────────────────────────────────────────
+    // Listen for form submission and POST the entered task as JSON.
+    addForm.addEventListener("submit", async (event) => {
+      // Stop the browser's default form action from reloading the whole page.
+      event.preventDefault();
+
+      // trim() removes spaces from both ends of the entered title.
+      const title = newTaskInput.value.trim();
+
+      // The HTML "required" rule normally catches this; this check also
+      // handles a value made entirely of spaces.
+      if (!title) {
+        errorMsg.textContent = "Please enter a task title.";
+        return;
+      }
+
+      errorMsg.textContent = "";
+      addButton.disabled = true;
+
+      try {
+        const response = await fetch(`${API}/tasks`, {
+          method: "POST",
+          // Tell FastAPI that the request body contains JSON data.
+          headers: { "Content-Type": "application/json" },
+          // Convert the JavaScript object into a JSON-formatted string.
+          body: JSON.stringify({ title }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Could not add task (HTTP ${response.status}).`);
+        }
+
+        // Clear the form, refresh all displayed data, and return focus.
+        newTaskInput.value = "";
+        await refreshAll();
+        newTaskInput.focus();
+      } catch (error) {
+        errorMsg.textContent = `${error.message} Is the FastAPI server running on port 8000?`;
+      } finally {
+        // Allow another submission after the request finishes.
+        addButton.disabled = false;
+      }
+    });
+
+    // ── Start the dashboard ────────────────────────────────────────────
+    // Connect the button to refreshAll().
+    refreshBtn.addEventListener("click", refreshAll);
+
+    // Fetch tasks and stats immediately when the page first opens.
+    refreshAll();
+  </script>
+</body>
+</html>
